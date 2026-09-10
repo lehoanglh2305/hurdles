@@ -1,0 +1,532 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+  .app {
+    --paper: #FAF6EE;
+    --card: #FFFFFF;
+    --ink: #262420;
+    --ink-soft: #75706A;
+    --line: #E3DAC9;
+    --accent: #33513B;
+    --accent-soft: #E4ECE3;
+    --pending: #A56B2A;
+    --pending-soft: #F3E6D2;
+    --danger: #A3402F;
+    --shadow: 0 1px 2px rgba(38, 36, 32, 0.05), 0 8px 20px rgba(38, 36, 32, 0.04);
+
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100%;
+    padding: 44px 24px 72px;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+
+  .app[data-theme="dark"] {
+    --paper: #1B2721;
+    --card: #223026;
+    --ink: #EDEAE0;
+    --ink-soft: #9FAA9B;
+    --line: #354438;
+    --accent: #E7C767;
+    --accent-soft: rgba(231, 199, 103, 0.14);
+    --pending: #E0946A;
+    --pending-soft: rgba(224, 148, 106, 0.14);
+    --danger: #E2867A;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  * { box-sizing: border-box; }
+
+  .page { max-width: 880px; margin: 0 auto; }
+
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .masthead h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 1.18;
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .masthead p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 58ch;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .theme-toggle {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease;
+  }
+
+  .theme-toggle:hover { transform: scale(1.06); }
+  .theme-toggle svg { width: 18px; height: 18px; }
+
+  .rule {
+    height: 3px;
+    margin: 26px 0 34px;
+    background: linear-gradient(to right, var(--ink) 0%, var(--ink) 100%);
+    opacity: 0.85;
+    position: relative;
+  }
+
+  .rule::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 6px;
+    height: 1px;
+    background: var(--ink);
+    opacity: 0.4;
+  }
+
+  .composer {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 40px;
+    box-shadow: var(--shadow);
+  }
+
+  .composer h2 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 600;
+    font-size: 17px;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+
+  .composer textarea {
+    width: 100%;
+    min-height: 78px;
+    resize: vertical;
+    border: none;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: transparent;
+    line-height: 27px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 26px,
+      var(--line) 27px
+    );
+    padding-top: 2px;
+  }
+
+  .composer textarea::placeholder { color: var(--ink-soft); opacity: 0.7; }
+
+  .composer-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .composer-row input[type="text"] {
+    flex: 1;
+    min-width: 180px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 13px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper);
+  }
+
+  .composer-row input[type="text"]:focus,
+  .composer textarea:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .composer-row button {
+    background: var(--accent);
+    color: var(--app-theme-dark, #fff);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .app[data-theme="dark"] .composer-row button { color: #1B2721; }
+
+  .composer-row button:hover { opacity: 0.88; }
+  .composer-row button:disabled { opacity: 0.5; cursor: default; }
+
+  .board {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  @media (max-width: 680px) {
+    .board { grid-template-columns: 1fr; }
+    .masthead h1 { font-size: 28px; }
+  }
+
+  .column h3 {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .column .count {
+    background: var(--line);
+    color: var(--ink-soft);
+    font-size: 12px;
+    padding: 1px 9px;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+
+  .list { display: flex; flex-direction: column; gap: 11px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--pending);
+    border-radius: 9px;
+    padding: 14px 15px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    box-shadow: var(--shadow);
+    animation: settle 0.25s ease;
+  }
+
+  .card.done { border-left-color: var(--accent); }
+
+  @keyframes settle {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .check { position: relative; flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+  .check input { position: absolute; opacity: 0; width: 18px; height: 18px; cursor: pointer; }
+
+  .check .box {
+    display: block;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--ink-soft);
+    border-radius: 5px;
+    background: var(--card);
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .check input:checked + .box { background: var(--accent); border-color: var(--accent); position: relative; }
+
+  .check input:checked + .box::after {
+    content: '';
+    position: absolute;
+    left: 5px; top: 1px;
+    width: 5px; height: 9px;
+    border: solid var(--card);
+    border-width: 0 2px 2px 0;
+    transform: rotate(40deg);
+  }
+
+  .body { flex: 1; min-width: 0; }
+
+  .text { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink); word-wrap: break-word; }
+
+  .card.done .text { color: var(--ink-soft); text-decoration: line-through; text-decoration-color: var(--line); }
+
+  .meta { margin: 6px 0 0; font-size: 12px; color: var(--ink-soft); }
+
+  .remove {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 17px;
+    cursor: pointer;
+    padding: 2px 5px;
+    line-height: 1;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .remove:hover { color: var(--danger); background: var(--accent-soft); }
+
+  .empty {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    border: 1px dashed var(--line);
+    border-radius: 9px;
+    padding: 17px;
+    line-height: 1.5;
+  }
+
+  .status-note {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: -20px 0 32px;
+    min-height: 16px;
+  }
+</style>
+
+<div class="app" id="appRoot">
+  <div class="page">
+    <div class="top-row">
+      <div class="masthead">
+        <h1>Câu hỏi và khó khăn của giáo viên</h1>
+        <p>Ghi lại điều bạn đang thắc mắc hoặc gặp khó khăn trong quá trình dạy. Mọi giáo viên đều thấy được danh sách này và có thể đánh dấu khi một mục đã được giải quyết.</p>
+      </div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Chuyển chế độ sáng hoặc tối" aria-pressed="false">
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4.5"/>
+          <line x1="12" y1="2.5" x2="12" y2="5"/>
+          <line x1="12" y1="19" x2="12" y2="21.5"/>
+          <line x1="2.5" y1="12" x2="5" y2="12"/>
+          <line x1="19" y1="12" x2="21.5" y2="12"/>
+          <line x1="5.1" y1="5.1" x2="6.8" y2="6.8"/>
+          <line x1="17.2" y1="17.2" x2="18.9" y2="18.9"/>
+          <line x1="5.1" y1="18.9" x2="6.8" y2="17.2"/>
+          <line x1="17.2" y1="6.8" x2="18.9" y2="5.1"/>
+        </svg>
+        <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.4 6.4 0 0 0 10.2 10.2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="composer">
+      <h2>Thêm một mục</h2>
+      <textarea id="entryText" placeholder="Bạn đang thắc mắc hoặc gặp khó khăn gì?"></textarea>
+      <div class="composer-row">
+        <input id="entryAuthor" type="text" placeholder="Tên của bạn (không bắt buộc)" />
+        <button id="addBtn">Thêm vào danh sách</button>
+      </div>
+    </div>
+
+    <p class="status-note" id="statusNote">Đang tải danh sách...</p>
+
+    <div class="board">
+      <div class="column">
+        <h3>Đang chờ xử lý <span class="count" id="pendingCount">0</span></h3>
+        <div class="list" id="pendingList"></div>
+      </div>
+      <div class="column">
+        <h3>Đã giải quyết <span class="count" id="doneCount">0</span></h3>
+        <div class="list" id="doneList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'entries';
+  const THEME_KEY = 'theme';
+  let entries = [];
+
+  const appRoot = document.getElementById('appRoot');
+  const textEl = document.getElementById('entryText');
+  const authorEl = document.getElementById('entryAuthor');
+  const addBtn = document.getElementById('addBtn');
+  const pendingList = document.getElementById('pendingList');
+  const doneList = document.getElementById('doneList');
+  const pendingCount = document.getElementById('pendingCount');
+  const doneCount = document.getElementById('doneCount');
+  const statusNote = document.getElementById('statusNote');
+  const themeToggle = document.getElementById('themeToggle');
+  const iconSun = document.getElementById('themeIconSun');
+  const iconMoon = document.getElementById('themeIconMoon');
+
+  function formatDate(ts) {
+    return new Date(ts).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function applyTheme(mode) {
+    appRoot.setAttribute('data-theme', mode);
+    themeToggle.setAttribute('aria-pressed', mode === 'dark' ? 'true' : 'false');
+    iconSun.style.display = mode === 'dark' ? 'none' : 'block';
+    iconMoon.style.display = mode === 'dark' ? 'block' : 'none';
+  }
+
+  async function initTheme() {
+    let mode = null;
+    try {
+      const result = await window.storage.get(THEME_KEY, false);
+      mode = result && result.value ? result.value : null;
+    } catch (err) {
+      mode = null;
+    }
+    if (!mode) {
+      mode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    applyTheme(mode);
+  }
+
+  async function toggleTheme() {
+    const current = appRoot.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try {
+      await window.storage.set(THEME_KEY, next, false);
+    } catch (err) { /* theme still applied for this session */ }
+  }
+
+  function makeCard(entry) {
+    const card = document.createElement('div');
+    card.className = 'card' + (entry.status === 'done' ? ' done' : '');
+
+    const label = document.createElement('label');
+    label.className = 'check';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = entry.status === 'done';
+    input.addEventListener('change', () => toggleEntry(entry.id));
+    const box = document.createElement('span');
+    box.className = 'box';
+    label.appendChild(input);
+    label.appendChild(box);
+
+    const body = document.createElement('div');
+    body.className = 'body';
+    const text = document.createElement('p');
+    text.className = 'text';
+    text.textContent = entry.text;
+    const meta = document.createElement('p');
+    meta.className = 'meta';
+    meta.textContent = (entry.author ? entry.author : 'Ẩn danh') + ', ' + formatDate(entry.createdAt);
+    body.appendChild(text);
+    body.appendChild(meta);
+
+    const remove = document.createElement('button');
+    remove.className = 'remove';
+    remove.textContent = '\u00d7';
+    remove.setAttribute('aria-label', 'Xoá mục này');
+    remove.addEventListener('click', () => removeEntry(entry.id));
+
+    card.appendChild(label);
+    card.appendChild(body);
+    card.appendChild(remove);
+    return card;
+  }
+
+  function render() {
+    const pending = entries.filter(e => e.status !== 'done').sort((a, b) => b.createdAt - a.createdAt);
+    const done = entries.filter(e => e.status === 'done').sort((a, b) => b.createdAt - a.createdAt);
+
+    pendingCount.textContent = pending.length;
+    doneCount.textContent = done.length;
+
+    pendingList.innerHTML = '';
+    if (pending.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'empty';
+      empty.textContent = 'Chưa có mục nào đang chờ. Hãy thêm điều bạn đang thắc mắc ở trên.';
+      pendingList.appendChild(empty);
+    } else {
+      pending.forEach(e => pendingList.appendChild(makeCard(e)));
+    }
+
+    doneList.innerHTML = '';
+    if (done.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'empty';
+      empty.textContent = 'Chưa có mục nào được đánh dấu đã giải quyết.';
+      doneList.appendChild(empty);
+    } else {
+      done.forEach(e => doneList.appendChild(makeCard(e)));
+    }
+  }
+
+  async function loadEntries() {
+    try {
+      const result = await window.storage.get(STORAGE_KEY, true);
+      entries = result && result.value ? JSON.parse(result.value) : [];
+      statusNote.textContent = '';
+    } catch (err) {
+      entries = [];
+      statusNote.textContent = 'Không tải được danh sách đã lưu trước đó. Bạn vẫn có thể thêm mục mới.';
+    }
+    render();
+  }
+
+  async function saveEntries() {
+    try {
+      const result = await window.storage.set(STORAGE_KEY, JSON.stringify(entries), true);
+      if (!result) throw new Error('empty result');
+    } catch (err) {
+      statusNote.textContent = 'Có lỗi khi lưu, hãy thử lại.';
+    }
+  }
+
+  async function addEntry() {
+    const text = textEl.value.trim();
+    if (!text) { textEl.focus(); return; }
+
+    addBtn.disabled = true;
+    const newEntry = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      text: text,
+      author: authorEl.value.trim(),
+      status: 'pending',
+      createdAt: Date.now()
+    };
+    entries.push(newEntry);
+    render();
+    textEl.value = '';
+    authorEl.value = '';
+    await saveEntries();
+    addBtn.disabled = false;
+  }
+
+  async function toggleEntry(id) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    entry.status = entry.status === 'done' ? 'pending' : 'done';
+    render();
+    await saveEntries();
+  }
+
+  async function removeEntry(id) {
+    entries = entries.filter(e => e.id !== id);
+    render();
+    await saveEntries();
+  }
+
+  addBtn.addEventListener('click', addEntry);
+  textEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addEntry();
+  });
+  themeToggle.addEventListener('click', toggleTheme);
+
+  initTheme();
+  loadEntries();
+</script>
